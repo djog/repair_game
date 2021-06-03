@@ -5,3 +5,4 @@ authors = ["rijkvp"]
 edition = "2018"
 
 [dependencies]
+raylib = "3.5.0"

@@ -1,38 +1,25 @@
+mod input;
+mod player;
+mod camera;
+
+use input::Input;
+use player::Player;
 use raylib::prelude::*;
+use camera::GameCamera;
 
-const WINDOW_WIDTH: i32 = 1020;
-const WINDOW_HEIGHT : i32 = 800;
-
-#[derive(Debug)]
-struct Input {
-    input_v: f32,
-    input_h: f32,
-}
-
-struct Player {
-    pos: Vector2,
-} 
-
-impl Player {
-    fn new() -> Self {
-        Self {
-            pos: Vector2::zero()
-        }
-    }
-
-    fn update(&mut self, delta_time: f32, input: Input) {
-        self.pos += Vector2::new(input.input_h, input.input_v) * delta_time * 100.0;
-    }
-}
+pub const WINDOW_WIDTH: i32 = 1020;
+pub const WINDOW_HEIGHT : i32 = 800;
 
 struct GameData {
     player: Player,
+    cam: GameCamera,
 }
 
 impl GameData {
     fn new() -> Self {
         Self {
-            player: Player::new()
+            player: Player::new(),
+            cam: GameCamera::new()
         }
     }
 }
@@ -45,7 +32,7 @@ struct Game {
 
 impl Game {
     fn new() -> Self {
-        let (mut rl, thread) = raylib::init()
+        let (rl, thread) = raylib::init()
             .size(WINDOW_WIDTH, WINDOW_HEIGHT)
             .title("Repair Game")
             .build();
@@ -64,20 +51,27 @@ impl Game {
     fn get_input(&mut self) -> Input 
     {
         let input_h = {
-
-            if self.rl.is_key_pressed(KeyboardKey::KEY_RIGHT) && self.rl.is_key_pressed(KeyboardKey::KEY_LEFT) {
+            if self.rl.is_key_down(KeyboardKey::KEY_A) && self.rl.is_key_down(KeyboardKey::KEY_D) {
                 0.0
-            } else if self.rl.is_key_pressed(KeyboardKey::KEY_RIGHT) {
+            } else if self.rl.is_key_down(KeyboardKey::KEY_D) {
                 1.0
-            } else if self.rl.is_key_pressed(KeyboardKey::KEY_LEFT) {
+            } else if self.rl.is_key_down(KeyboardKey::KEY_A) {
                 -1.0
             } else {
                 0.0
             }
         };
-
-        let input_v = 0.0;
-
+        let input_v = {
+            if self.rl.is_key_down(KeyboardKey::KEY_W) && self.rl.is_key_down(KeyboardKey::KEY_S) {
+                0.0
+            } else if self.rl.is_key_down(KeyboardKey::KEY_W) {
+                1.0
+            } else if self.rl.is_key_down(KeyboardKey::KEY_S) {
+                -1.0
+            } else {
+                0.0
+            }
+        };
         Input {
             input_h,
             input_v
@@ -86,21 +80,27 @@ impl Game {
 
     fn update(&mut self) {
         let input = self.get_input();
-        println!("{:?}", input); 
         let dt = self.rl.get_frame_time();
         self.data.player.update(dt, input);
+        self.data.cam.follow(self.data.player.pos, dt);
     }
 
     fn draw(&mut self) {
         let mut d = self.rl.begin_drawing(&self.thread);
 
         d.clear_background(Color::WHITE);
-        d.draw_text("Repair game!", 12, 12, 46, Color::BLACK);                
+
         Self::draw_game(&mut d, &self.data);
     }
 
     fn draw_game(d: &mut impl RaylibDraw, data: &GameData) {
-        d.draw_rectangle(data.player.pos.x as i32, data.player.pos.y as i32, 100, 100, Color::RED);
+        {
+            let mut d2 = d.begin_mode2D(data.cam.get_camera());
+            d2.draw_rectangle(data.player.pos.x as i32, data.player.pos.y as i32, 100, 100, Color::RED);
+            
+            d2.draw_circle(500, 500, 64.0, Color::BLUE); // Temp
+        }
+        d.draw_fps(12, 12);
     }
 
     fn run(mut self) {
@@ -111,7 +111,6 @@ impl Game {
         }
     }
 }
-
 
 fn main() {
     Game::new().run();

@@ -4,12 +4,14 @@ use crate::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 pub struct GameCamera {
     pos: Vector2,
+    pub zoom: f32,
 }
 
 impl GameCamera {
     pub fn new() -> Self {
         Self {
             pos: Vector2::zero(),
+            zoom: 1.0
         }
     }
 
@@ -18,7 +20,7 @@ impl GameCamera {
             offset: Vector2::new(WINDOW_WIDTH as f32 / 2.0, WINDOW_HEIGHT as f32 / 2.0) - Vector2::new(50.0, 50.0),
             target: self.pos,
             rotation: 0.0,
-            zoom: 1.0,
+            zoom: self.zoom,
         }
     }
 

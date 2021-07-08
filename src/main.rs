@@ -84,7 +84,8 @@ impl Game {
                 0.0
             }
         };
-        Input { input_h, input_v }
+        let sprint_key = self.rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL);
+        Input { input_h, input_v, sprint_key }
     }
 
     fn update(&mut self) {

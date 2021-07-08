@@ -16,6 +16,9 @@ impl Player {
     }
 
     pub fn update(&mut self, delta_time: f32, input: Input) {
-        self.pos += Vector2::new(input.input_h, -input.input_v) * delta_time * MOVE_SPEED;
+        let dir = Vector2::new(input.input_h, -input.input_v);
+        if dir.length() > 0.0 {
+            self.pos += dir.normalized() * delta_time * MOVE_SPEED;
+        }
     }
 }

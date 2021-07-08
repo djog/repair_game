@@ -124,12 +124,12 @@ impl Game {
                     let rect = {
                         if tile.id == 0 {
                             Rectangle::new(0.0, 0.0, 64.0, 64.0)
-                        } else if tile.id == 2 {
-                            Rectangle::new(64.0, 0.0, 64.0, 64.0)
-                        } else if tile.id == 3 {
+                        } else if tile.id == 1 {
                             Rectangle::new(0.0, 64.0, 64.0, 64.0)
-                        } else {
+                        } else if tile.id == 2 {
                             Rectangle::new(64.0, 64.0, 64.0, 64.0)
+                        } else {
+                            Rectangle::new(64.0, 0.0, 64.0, 64.0)
                         }
                     };
                     let draw_x = x as i32 * TILE_SIZE - (WORLD_SIZE / 2) as i32 * TILE_SIZE;

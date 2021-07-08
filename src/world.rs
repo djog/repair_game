@@ -6,7 +6,7 @@ pub struct Tile {
 }
 
 pub const TILE_SIZE: i32 = 64;
-pub const WORLD_SIZE: usize = 64;
+pub const WORLD_SIZE: usize = 128;
 pub const LEVEL_FILE: &str = "level.txt";
 
 pub struct World {

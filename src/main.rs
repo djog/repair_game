@@ -2,6 +2,7 @@ mod camera;
 mod input;
 mod player;
 mod world;
+mod minigames;
 
 use camera::GameCamera;
 use input::Input;
@@ -12,11 +13,36 @@ use world::{World, TILE_SIZE, WORLD_SIZE};
 pub const WINDOW_WIDTH: i32 = 1020;
 pub const WINDOW_HEIGHT: i32 = 800;
 
+enum MiniGameType {
+    Test,
+    Pong,
+    PeanutButterCogs,
+}
+
+struct Part {
+    pos: Vector2,
+    is_playable: bool,
+    difficulty: u8,
+    mg_type: MiniGameType
+}
+
+impl Part {
+    pub fn new(pos: Vector2, mg_type: MiniGameType) -> Self {
+        Self {
+            pos,
+            is_playable: true,
+            difficulty: 1,
+            mg_type
+        }
+    }
+}
+
 struct GameData {
     player: Player,
     cam: GameCamera,
     world: World,
     texture: Option<Texture2D>,
+    parts: Vec<Part>
 }
 
 impl GameData {
@@ -26,6 +52,7 @@ impl GameData {
             cam: GameCamera::new(),
             world: World::new(),
             texture: None,
+            parts: vec![Part::new(Vector2::new(2000.0,6000.0), MiniGameType::Test)]
         }
     }
 }
@@ -144,6 +171,11 @@ impl Game {
                     };
                 }
             }
+
+            for part in data.parts.iter() {
+                d2.draw_circle(part.pos.x as i32, part.pos.x as i32, TILE_SIZE as f32, Color::YELLOW);
+            }
+
             d2.draw_rectangle(
                 data.player.pos.x as i32,
                 data.player.pos.y as i32,

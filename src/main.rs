@@ -1,8 +1,8 @@
 mod camera;
 mod input;
+mod minigames;
 mod player;
 mod world;
-mod minigames;
 
 use camera::GameCamera;
 use input::Input;
@@ -13,46 +13,55 @@ use world::{World, TILE_SIZE, WORLD_SIZE};
 pub const WINDOW_WIDTH: i32 = 1020;
 pub const WINDOW_HEIGHT: i32 = 800;
 
-enum MiniGameType {
+#[derive(Debug, Copy, Clone)]
+enum MGType {
     Test,
     Pong,
     PeanutButterCogs,
 }
 
+#[derive(Copy, Clone)]
 struct Part {
     pos: Vector2,
     is_playable: bool,
     difficulty: u8,
-    mg_type: MiniGameType
+    mg_type: MGType,
+}
+
+enum GameState {
+    Game,
+    MiniGame(MGType),
 }
 
 impl Part {
-    pub fn new(pos: Vector2, mg_type: MiniGameType) -> Self {
+    pub fn new(pos: Vector2, mg_type: MGType) -> Self {
         Self {
             pos,
             is_playable: true,
             difficulty: 1,
-            mg_type
+            mg_type,
         }
     }
 }
 
 struct GameData {
+    state: GameState,
     player: Player,
     cam: GameCamera,
     world: World,
     texture: Option<Texture2D>,
-    parts: Vec<Part>
+    parts: Vec<Part>,
 }
 
 impl GameData {
     fn new() -> Self {
         Self {
+            state: GameState::Game,
             player: Player::new(),
             cam: GameCamera::new(),
             world: World::new(),
             texture: None,
-            parts: vec![Part::new(Vector2::new(2000.0,6000.0), MiniGameType::Test)]
+            parts: vec![Part::new(Vector2::new(2000.0, 6000.0), MGType::Test)],
         }
     }
 }
@@ -112,24 +121,51 @@ impl Game {
             }
         };
         let sprint_key = self.rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL);
-        Input { input_h, input_v, sprint_key }
+        let interact_key = self.rl.is_key_down(KeyboardKey::KEY_E);
+        Input {
+            input_h,
+            input_v,
+            sprint_key,
+            interact_key,
+        }
     }
 
     fn update(&mut self) {
-        let input = self.get_input();
         let dt = self.rl.get_frame_time();
-        self.data.player.update(dt, input);
-        let zoom_input = {
-            if self.rl.is_key_down(KeyboardKey::KEY_EQUAL) {
-                1.0
-            } else if self.rl.is_key_down(KeyboardKey::KEY_MINUS) {
-                -1.0
-            } else {
-                0.0
+
+        let input = self.get_input();
+
+        match self.data.state {
+            GameState::Game => {
+                self.data.player.update(dt, input);
+                for part in self.data.parts.iter() {
+                    let dir = part.pos - self.data.player.pos;
+                    println!("LEN: {}", dir.length());
+                    if self.data.player.pos.distance_to(part.pos) < 6000.0 {
+                        println!("In REACH!");
+                        if part.is_playable && input.interact_key {
+                            println!("PRESSED!");
+                            self.data.state = GameState::MiniGame(part.mg_type.clone());
+                        }
+                    }
+                }
+                // Canera stuff
+                let zoom_input = {
+                    if self.rl.is_key_down(KeyboardKey::KEY_EQUAL) {
+                        1.0
+                    } else if self.rl.is_key_down(KeyboardKey::KEY_MINUS) {
+                        -1.0
+                    } else {
+                        0.0
+                    }
+                };
+                self.data.cam.zoom += zoom_input * dt * self.data.cam.zoom;
+                self.data.cam.follow(self.data.player.pos, dt);
+            }
+            GameState::MiniGame(mg_type) => {
+                println!("UPDATE: {:?}", mg_type);
             }
         };
-        self.data.cam.zoom += zoom_input * dt * self.data.cam.zoom;
-        self.data.cam.follow(self.data.player.pos, dt);
     }
 
     fn draw(&mut self) {
@@ -174,7 +210,12 @@ impl Game {
             }
 
             for part in data.parts.iter() {
-                d2.draw_circle(part.pos.x as i32, part.pos.x as i32, TILE_SIZE as f32, Color::YELLOW);
+                d2.draw_circle(
+                    part.pos.x as i32,
+                    part.pos.x as i32,
+                    TILE_SIZE as f32,
+                    Color::YELLOW,
+                );
             }
 
             d2.draw_rectangle(

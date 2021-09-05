@@ -20,7 +20,7 @@ impl World {
         }
     }
 
-    pub fn generate(&mut self) {
+    pub fn _generate(&mut self) {
         for x in 0..WORLD_SIZE {
             for y in 0..WORLD_SIZE {
                 if x % 2 == 0 {

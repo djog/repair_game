@@ -33,6 +33,10 @@ impl GameData {
             game_objects: vec![GameObject::new(
                 Vector2::new(1500.0, 200.0),
                 MinigameType::Test,
+            ),
+            GameObject::new(
+                Vector2::new(800.0, 200.0),
+                MinigameType::Cables,
             )],
         }
     }
@@ -53,6 +57,7 @@ impl Game {
         let (rl, thread) = raylib::init()
             .size(WINDOW_WIDTH, WINDOW_HEIGHT)
             .title("Repair Game")
+            .resizable()
             .build();
 
         Self {

@@ -5,7 +5,15 @@ use raylib::{
     texture::{Image, Texture2D},
 };
 
-use crate::{WINDOW_HEIGHT, WINDOW_WIDTH, camera::GameCamera, engine::Engine, game_object::GameObject, minigames::{Minigame, MinigameType, build_minigame}, player::Player, world::{World, TILE_SIZE, WORLD_SIZE}};
+use crate::{
+    camera::GameCamera,
+    engine::Engine,
+    game_object::GameObject,
+    minigames::{build_minigame, Minigame, MinigameType},
+    player::Player,
+    world::{World, TILE_SIZE, WORLD_SIZE},
+    WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 
 struct GameData {
     state: GameState,
@@ -30,13 +38,11 @@ impl GameData {
             texture: None,
             can_interact: false,
             interact_msg: String::default(),
-            game_objects: vec![GameObject::new(
-                Vector2::new(1500.0, 200.0),
-                MinigameType::Test,
-            ), GameObject::new(
-                Vector2::new(1500.0, 050.0),
-                MinigameType::Lockpick,
-            )],
+            game_objects: vec![
+                GameObject::new(Vector2::new(1500.0, 200.0), MinigameType::Test),
+                GameObject::new(Vector2::new(1500.0, 050.0), MinigameType::Lockpick),
+                GameObject::new(Vector2::new(800.0, 200.0), MinigameType::Cables),
+            ],
         }
     }
 }
@@ -55,7 +61,9 @@ impl Game {
     pub fn new() -> Self {
         let (rl, thread) = raylib::init()
             .size(WINDOW_WIDTH, WINDOW_HEIGHT)
+            .resizable()
             .title("Repair Game")
+            .resizable()
             .build();
 
         Self {
@@ -136,11 +144,26 @@ impl Game {
                         if tile.id == 0 {
                             Rectangle::new(0.0, 0.0, 64.0, TILE_SIZE as f32)
                         } else if tile.id == 1 {
-                            Rectangle::new(0.0, TILE_SIZE as f32, TILE_SIZE as f32, TILE_SIZE as f32)
+                            Rectangle::new(
+                                0.0,
+                                TILE_SIZE as f32,
+                                TILE_SIZE as f32,
+                                TILE_SIZE as f32,
+                            )
                         } else if tile.id == 2 {
-                            Rectangle::new(TILE_SIZE as f32, TILE_SIZE as f32, TILE_SIZE as f32, TILE_SIZE as f32)
+                            Rectangle::new(
+                                TILE_SIZE as f32,
+                                TILE_SIZE as f32,
+                                TILE_SIZE as f32,
+                                TILE_SIZE as f32,
+                            )
                         } else {
-                            Rectangle::new(TILE_SIZE as f32, 0.0, TILE_SIZE as f32, TILE_SIZE as f32)
+                            Rectangle::new(
+                                TILE_SIZE as f32,
+                                0.0,
+                                TILE_SIZE as f32,
+                                TILE_SIZE as f32,
+                            )
                         }
                     };
                     let draw_x = x as i32 * TILE_SIZE - (WORLD_SIZE / 2) as i32 * TILE_SIZE;

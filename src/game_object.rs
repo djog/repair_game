@@ -1,6 +1,6 @@
 use raylib::math::Vector2;
 
-use crate::minigame::MinigameType;
+use crate::minigames::MinigameType;
 
 #[derive(Copy, Clone)]
 pub struct GameObject {

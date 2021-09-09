@@ -1,26 +1,11 @@
 use raylib::{
     color::Color,
-    consts::KeyboardKey,
     math::{Rectangle, Vector2},
     prelude::{RaylibDraw, RaylibMode2DExt},
     texture::{Image, Texture2D},
-    RaylibHandle, RaylibThread,
 };
 
-use crate::{
-    camera::GameCamera,
-    game_object::GameObject,
-    input::Input,
-    minigame::{build_minigame, Minigame, MinigameType},
-    player::Player,
-    world::{World, TILE_SIZE, WORLD_SIZE},
-    WINDOW_HEIGHT, WINDOW_WIDTH,
-};
-
-enum GameState {
-    Game,
-    MiniGame(MinigameType),
-}
+use crate::{WINDOW_HEIGHT, WINDOW_WIDTH, camera::GameCamera, engine::Engine, game_object::GameObject, minigames::{Minigame, MinigameType, build_minigame}, player::Player, world::{World, TILE_SIZE, WORLD_SIZE}};
 
 struct GameData {
     state: GameState,
@@ -53,9 +38,13 @@ impl GameData {
     }
 }
 
+enum GameState {
+    Game,
+    MiniGame(MinigameType),
+}
+
 pub struct Game {
-    rl: RaylibHandle,
-    thread: RaylibThread,
+    engine: Engine,
     data: GameData,
 }
 
@@ -67,60 +56,23 @@ impl Game {
             .build();
 
         Self {
-            rl,
-            thread,
+            engine: Engine::new(rl, thread),
             data: GameData::new(),
         }
     }
 
     fn init(&mut self) {
-        let i = Image::load_image("texture.png").expect("Couldn't load texture!");
-        let texture = self
-            .rl
-            .load_texture_from_image(&self.thread, &i)
-            .expect("Could not load texture from image!");
+        let image = Image::load_image("texture.png").expect("Couldn't load texture!");
+        let texture = self.engine.create_texture(image);
         self.data.texture = Some(texture);
 
         self.data.world.load_level();
     }
 
-    fn get_input(&mut self) -> Input {
-        let input_h = {
-            if self.rl.is_key_down(KeyboardKey::KEY_A) && self.rl.is_key_down(KeyboardKey::KEY_D) {
-                0.0
-            } else if self.rl.is_key_down(KeyboardKey::KEY_D) {
-                1.0
-            } else if self.rl.is_key_down(KeyboardKey::KEY_A) {
-                -1.0
-            } else {
-                0.0
-            }
-        };
-        let input_v = {
-            if self.rl.is_key_down(KeyboardKey::KEY_W) && self.rl.is_key_down(KeyboardKey::KEY_S) {
-                0.0
-            } else if self.rl.is_key_down(KeyboardKey::KEY_W) {
-                1.0
-            } else if self.rl.is_key_down(KeyboardKey::KEY_S) {
-                -1.0
-            } else {
-                0.0
-            }
-        };
-        let sprint_key = self.rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL);
-        let interact_key = self.rl.is_key_down(KeyboardKey::KEY_E);
-        Input {
-            input_h,
-            input_v,
-            sprint_key,
-            interact_key,
-        }
-    }
-
     fn update(&mut self) {
-        let dt = self.rl.get_frame_time();
+        let dt = self.engine.get_delta_time();
 
-        let input = self.get_input();
+        let input = self.engine.get_input();
 
         match self.data.state {
             GameState::Game => {
@@ -140,33 +92,33 @@ impl Game {
                     }
                 }
                 // Camera stuff
-                let zoom_input = {
-                    if self.rl.is_key_down(KeyboardKey::KEY_EQUAL) {
-                        1.0
-                    } else if self.rl.is_key_down(KeyboardKey::KEY_MINUS) {
-                        -1.0
-                    } else {
-                        0.0
-                    }
-                };
-                self.data.cam.zoom += zoom_input * dt * self.data.cam.zoom;
+                self.data.cam.zoom += input.input_zoom * dt * self.data.cam.zoom;
                 self.data.cam.follow(self.data.player.pos, dt);
             }
-            GameState::MiniGame(mg_type) => {
+            GameState::MiniGame(_) => {
                 if let Some(mg) = &mut self.data.minigame {
-                    mg.update(dt, input);
+                    let switch = mg.update(dt, input);
+                    if switch {
+                        self.data.state = GameState::Game;
+                        self.data.minigame = None;
+                    }
                 }
-                println!("UPDATE: {:?}", mg_type);
             }
         };
     }
 
     fn draw(&mut self) {
-        let mut d = self.rl.begin_drawing(&self.thread);
-
-        d.clear_background(Color::WHITE);
-
-        Self::draw_game(&mut d, &self.data);
+        match self.data.state {
+            GameState::Game => {
+                let mut d = self.engine.start_draw(Color::WHITE);
+                Self::draw_game(&mut d, &self.data);
+            }
+            GameState::MiniGame(_) => {
+                if let Some(mg) = &mut self.data.minigame {
+                    mg.draw(&mut self.engine);
+                }
+            }
+        }
     }
 
     fn draw_game(d: &mut impl RaylibDraw, data: &GameData) {
@@ -232,7 +184,7 @@ impl Game {
 
     pub fn run(mut self) {
         self.init();
-        while !self.rl.window_should_close() {
+        while !self.engine.window_open() {
             self.update();
             self.draw();
         }

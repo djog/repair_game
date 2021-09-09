@@ -1,9 +1,9 @@
 // Modules
 mod camera;
+mod engine;
 mod game;
 mod game_object;
 mod input;
-mod minigame;
 mod minigames;
 mod player;
 mod world;

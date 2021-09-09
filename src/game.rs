@@ -56,6 +56,7 @@ impl Game {
     pub fn new() -> Self {
         let (rl, thread) = raylib::init()
             .size(WINDOW_WIDTH, WINDOW_HEIGHT)
+            .resizable()
             .title("Repair Game")
             .resizable()
             .build();

@@ -31,7 +31,7 @@ impl GameData {
             can_interact: false,
             interact_msg: String::default(),
             game_objects: vec![GameObject::new(
-                Vector2::new(1500.0, 700.0),
+                Vector2::new(1500.0, 200.0),
                 MinigameType::Test,
             )],
         }
@@ -62,7 +62,7 @@ impl Game {
     }
 
     fn init(&mut self) {
-        let image = Image::load_image("texture.png").expect("Couldn't load texture!");
+        let image = Image::load_image("assets/texture_atlas.png").expect("Couldn't load texture!");
         let texture = self.engine.create_texture(image);
         self.data.texture = Some(texture);
 
@@ -131,13 +131,13 @@ impl Game {
 
                     let rect = {
                         if tile.id == 0 {
-                            Rectangle::new(0.0, 0.0, 64.0, 64.0)
+                            Rectangle::new(0.0, 0.0, 64.0, TILE_SIZE as f32)
                         } else if tile.id == 1 {
-                            Rectangle::new(0.0, 64.0, 64.0, 64.0)
+                            Rectangle::new(0.0, TILE_SIZE as f32, TILE_SIZE as f32, TILE_SIZE as f32)
                         } else if tile.id == 2 {
-                            Rectangle::new(64.0, 64.0, 64.0, 64.0)
+                            Rectangle::new(TILE_SIZE as f32, TILE_SIZE as f32, TILE_SIZE as f32, TILE_SIZE as f32)
                         } else {
-                            Rectangle::new(64.0, 0.0, 64.0, 64.0)
+                            Rectangle::new(TILE_SIZE as f32, 0.0, TILE_SIZE as f32, TILE_SIZE as f32)
                         }
                     };
                     let draw_x = x as i32 * TILE_SIZE - (WORLD_SIZE / 2) as i32 * TILE_SIZE;
@@ -165,8 +165,8 @@ impl Game {
             d2.draw_rectangle(
                 data.player.pos.x as i32,
                 data.player.pos.y as i32,
-                100,
-                100,
+                32,
+                32,
                 Color::RED,
             );
         }

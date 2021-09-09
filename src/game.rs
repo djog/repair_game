@@ -33,6 +33,9 @@ impl GameData {
             game_objects: vec![GameObject::new(
                 Vector2::new(1500.0, 200.0),
                 MinigameType::Test,
+            ), GameObject::new(
+                Vector2::new(1500.0, 050.0),
+                MinigameType::Lockpick,
             )],
         }
     }

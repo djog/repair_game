@@ -1,4 +1,11 @@
-use raylib::{RaylibHandle, RaylibThread, color::Color, consts::KeyboardKey, prelude::{RaylibDraw, RaylibDrawHandle}, texture::{Image, Texture2D}};
+use raylib::{
+    color::Color,
+    consts::KeyboardKey,
+    math::Vector2,
+    prelude::{RaylibDraw, RaylibDrawHandle},
+    texture::{Image, Texture2D},
+    RaylibHandle, RaylibThread,
+};
 
 use crate::input::Input;
 
@@ -9,14 +16,18 @@ pub struct Engine {
 
 impl Engine {
     pub fn new(rl: RaylibHandle, thread: RaylibThread) -> Self {
-        Self {
-            rl,
-            thread,
-        }
+        Self { rl, thread }
     }
 
     pub fn window_open(&self) -> bool {
         self.rl.window_should_close()
+    }
+
+    pub fn get_screen_size(&self) -> Vector2 {
+        Vector2::new(
+            self.rl.get_screen_width() as f32,
+            self.rl.get_screen_height() as f32,
+        )
     }
 
     pub fn get_input(&mut self) -> Input {
@@ -54,7 +65,7 @@ impl Engine {
         let sprint_key = self.rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL);
         let interact_key = self.rl.is_key_down(KeyboardKey::KEY_E);
         let space_key = self.rl.is_key_down(KeyboardKey::KEY_SPACE);
-        
+
         Input {
             input_h,
             input_v,

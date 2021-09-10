@@ -2,8 +2,8 @@ use raylib::prelude::*;
 
 use crate::input::Input;
 
-const WALK_SPEED: f32 = 300.0;
-const SPRINT_SPEED: f32 = 600.0;
+const WALK_SPEED: f32 = 100.0;
+const SPRINT_SPEED: f32 = 200.0;
 
 pub struct Player {
     pub pos: Vector2,

@@ -12,7 +12,6 @@ use crate::{
     minigames::{build_minigame, Minigame, MinigameType},
     player::Player,
     world::{World, TILE_SIZE, WORLD_SIZE},
-    WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 
 struct GameData {
@@ -39,9 +38,9 @@ impl GameData {
             can_interact: false,
             interact_msg: String::default(),
             game_objects: vec![
-                GameObject::new(Vector2::new(1500.0, 200.0), MinigameType::Test),
-                GameObject::new(Vector2::new(1500.0, 050.0), MinigameType::Lockpick),
-                GameObject::new(Vector2::new(800.0, 200.0), MinigameType::Cables),
+                GameObject::new(Vector2::new(256.0 + 128.0, 64.0), MinigameType::Test),
+                GameObject::new(Vector2::new(256.0, 64.0), MinigameType::Lockpick),
+                GameObject::new(Vector2::new(128.0, 64.0), MinigameType::Cables),
             ],
         }
     }
@@ -60,7 +59,6 @@ pub struct Game {
 impl Game {
     pub fn new() -> Self {
         let (rl, thread) = raylib::init()
-            .size(WINDOW_WIDTH, WINDOW_HEIGHT)
             .resizable()
             .title("Repair Game")
             .resizable()
@@ -90,7 +88,7 @@ impl Game {
                 self.data.player.update(dt, input);
                 self.data.can_interact = false;
                 for go in self.data.game_objects.iter() {
-                    if self.data.player.pos.distance_to(go.pos) < 200.0 {
+                    if self.data.player.pos.distance_to(go.pos) < 16.0 {
                         if go.is_playable {
                             self.data.can_interact = true;
                             self.data.interact_msg = format!("Go to {:?}", go.mg_type);
@@ -121,8 +119,7 @@ impl Game {
     fn draw(&mut self) {
         match self.data.state {
             GameState::Game => {
-                let mut d = self.engine.start_draw(Color::WHITE);
-                Self::draw_game(&mut d, &self.data);
+              self.draw_game();
             }
             GameState::MiniGame(_) => {
                 if let Some(mg) = &mut self.data.minigame {
@@ -132,9 +129,12 @@ impl Game {
         }
     }
 
-    fn draw_game(d: &mut impl RaylibDraw, data: &GameData) {
+    fn draw_game(&mut self) {
+        let screen_size = self.engine.get_screen_size();
+        let mut d = self.engine.start_draw(Color::WHITE);
+        let data = &self.data;
         {
-            let mut d2 = d.begin_mode2D(data.cam.get_camera());
+            let mut d2 = d.begin_mode2D(data.cam.get_camera(screen_size));
 
             for x in 0..data.world.tiles.len() {
                 for y in 0..data.world.tiles.len() {
@@ -183,16 +183,16 @@ impl Game {
                 d2.draw_circle(
                     part.pos.x as i32,
                     part.pos.y as i32,
-                    TILE_SIZE as f32,
-                    Color::YELLOW,
+                    TILE_SIZE as f32 / 2.0,
+                    Color::ORANGE,
                 );
             }
 
             d2.draw_rectangle(
                 data.player.pos.x as i32,
                 data.player.pos.y as i32,
-                32,
-                32,
+                16,
+                16,
                 Color::RED,
             );
         }
@@ -200,8 +200,8 @@ impl Game {
         if data.can_interact {
             d.draw_text(
                 &format!("[E] {}", data.interact_msg),
-                WINDOW_WIDTH / 2,
-                WINDOW_HEIGHT - 50,
+                100,
+                100,
                 24,
                 Color::ORANGE,
             );

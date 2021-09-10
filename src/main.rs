@@ -8,9 +8,6 @@ mod minigames;
 mod player;
 mod world;
 
-pub const WINDOW_WIDTH: i32 = 1020;
-pub const WINDOW_HEIGHT: i32 = 800;
-
 use game::Game;
 
 fn main() {

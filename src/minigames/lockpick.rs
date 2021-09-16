@@ -6,6 +6,10 @@ use raylib::{color::Color, prelude::RaylibDraw};
 pub struct LockpickGame;
 
 impl Minigame for LockpickGame {
+    fn init(&mut self) {
+
+    }
+    
     fn update(&mut self, _dt: f32, input: Input) -> bool {
         if input.space_key {
             return true;

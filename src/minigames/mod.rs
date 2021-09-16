@@ -18,7 +18,6 @@ pub enum MinigameType {
 }
 
 pub trait Minigame {
-    fn init(&mut self);
     fn update(&mut self, dt: f32, input: Input) -> bool;
     fn draw(&self, rl: &mut Engine);
 }
@@ -28,11 +27,10 @@ pub fn build_minigame(mg_type: MinigameType) -> Box<dyn Minigame> {
     let mut mg: Box<dyn Minigame> = match mg_type {
         MinigameType::Test => Box::new(EmptyGame::default()),
         MinigameType::Lockpick => Box::new(LockpickGame::default()),
-        MinigameType::Cables => Box::new(CablesGame::default()),
+        MinigameType::Cables => Box::new(CablesGame::new()),
         MinigameType::Pong => todo!(),
         MinigameType::Test => Box::new(LockpickGame::default()),
         MinigameType::PeanutButterCogs => todo!(),
     };
-    mg.init();
     return mg;
 }

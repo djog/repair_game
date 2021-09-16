@@ -5,7 +5,6 @@ mod game;
 mod game_object;
 mod input;
 mod minigames;
-mod physics;
 mod player;
 mod world;
 

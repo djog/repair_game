@@ -6,10 +6,7 @@ use raylib::{color::Color, prelude::RaylibDraw};
 pub struct EmptyGame;
 
 impl Minigame for EmptyGame {
-    fn init(&mut self) {
-
-    }
-
+   
     fn update(&mut self, _dt: f32, input: Input) -> bool {
         if input.space_key {
             return true;

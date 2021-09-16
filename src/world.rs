@@ -37,9 +37,11 @@ impl World {
             fs::read_to_string(LEVEL_FILE).expect("Something went wrong reading the level file!");
         let mut line_counter = 0;
         for l in contents.lines() {
-            for c in 0..l.len() {
-                let id = l.chars().nth(c).unwrap() as u8 - 48;
-                self.tiles[c][line_counter] = Tile { id };
+            let mut char_counter = 0;
+            for c in l.chars() {
+                let id = c as u8 - 48;
+                self.tiles[char_counter][line_counter] = Tile { id };
+                char_counter += 1;
             }
             line_counter += 1;
         }
